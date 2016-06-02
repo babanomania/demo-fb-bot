@@ -3,6 +3,7 @@
 const express = require('express')
 const bodyParser = require('body-parser')
 const request = require('request')
+var r = require('./responses');
 const app = express()
 
 app.set('port', (process.env.PORT || 5000))
@@ -37,7 +38,9 @@ app.post('/webhook/', function (req, res) {
             sendGenericMessage(sender)
             continue
         }
-        sendTextMessage(sender, "Text received, echo: " + text.substring(0, 200))
+
+        var returnMsg = getResponse( text );
+        sendTextMessage(sender, returnMsg );
       }
       if (event.postback) {
         let text = JSON.stringify(event.postback)
@@ -121,4 +124,17 @@ function sendGenericMessage(sender) {
             console.log('Error: ', response.body.error)
         }
     })
+}
+
+function getResponse(message) {
+    for(var i = 0; i < r.length; i++) {
+        for(var j = 0; j < r[i].keywords.length; j++) {
+            if(message.toLowerCase().indexOf(r[i].keywords[j]) != -1) {
+                console.log("Responding to message: " + message);
+                return r[i].messages[Math.floor(Math.random() * r[i].messages.length)];
+            }
+        }
+    }
+
+    return "hmmm";
 }
